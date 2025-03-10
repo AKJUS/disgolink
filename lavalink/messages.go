@@ -163,7 +163,7 @@ type TrackEndEvent struct {
 }
 
 func (TrackEndEvent) Op() Op                  { return OpEvent }
-func (TrackEndEvent) Type() EventType         { return EventTypeTrackStart }
+func (TrackEndEvent) Type() EventType         { return EventTypeTrackEnd }
 func (e TrackEndEvent) GuildID() snowflake.ID { return e.GuildID_ }
 
 type TrackEndReason string
