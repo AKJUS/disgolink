@@ -7,8 +7,9 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
+
+	"github.com/disgoorg/disgolink/v3/lavalink"
 )
 
 type Client interface {

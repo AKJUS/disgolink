@@ -153,6 +153,11 @@ func (p *playerImpl) Destroy(ctx context.Context) error {
 		return err
 	}
 
+	// check if this player already got destroyed
+	if player := p.lavalink.ExistingPlayer(p.guildID); player == nil {
+		return nil
+	}
+
 	p.lavalink.ForPlugins(func(plugin Plugin) {
 		if pl, ok := plugin.(PluginEventHandler); ok {
 			pl.OnDestroyPlayer(p)
