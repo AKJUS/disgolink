@@ -145,7 +145,7 @@ func (c *restClientImpl) do(ctx context.Context, method string, path string, rqB
 		rq.Header.Set("Content-Type", "application/json")
 	}
 
-	c.logger.DebugContext(ctx, "sending request", slog.String("method", method), slog.String("path", path), slog.String("body", fmt.Sprintf("%v", rqBody)))
+	c.logger.DebugContext(ctx, "sending request", slog.String("method", method), slog.String("path", path), slog.String("body", string(rqBody)))
 
 	rs, err := c.httpClient.Do(rq)
 	if err != nil {

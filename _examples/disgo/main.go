@@ -16,8 +16,9 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
-	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/snowflake/v2"
+
+	"github.com/disgoorg/disgolink/v3/disgolink"
 )
 
 var (
@@ -25,7 +26,7 @@ var (
 	searchPattern = regexp.MustCompile(`^(.{2})search:(.+)`)
 
 	Token   = os.Getenv("TOKEN")
-	GuildId = snowflake.GetEnv("GUILD_ID")
+	GuildID = snowflake.GetEnv("GUILD_ID")
 
 	NodeName      = os.Getenv("NODE_NAME")
 	NodeAddress   = os.Getenv("NODE_ADDRESS")
@@ -37,6 +38,7 @@ func main() {
 	slog.Info("starting disgo example...")
 	slog.Info("disgo version", slog.String("version", disgo.Version))
 	slog.Info("disgolink version: ", slog.String("version", disgolink.Version))
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	b := newBot()
 
