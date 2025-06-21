@@ -3,6 +3,7 @@ package disgolink
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -227,22 +228,23 @@ func (p *playerImpl) OnPlayerUpdate(state lavalink.PlayerState) {
 }
 
 func (p *playerImpl) OnVoiceServerUpdate(ctx context.Context, token string, endpoint string) {
-	if _, err := p.Node().Rest().UpdatePlayer(ctx, p.node.SessionID(), p.guildID, lavalink.PlayerUpdate{
-		Voice: &lavalink.VoiceState{
-			Token:     token,
-			Endpoint:  endpoint,
-			SessionID: p.voice.SessionID,
-		},
-	}); err != nil {
-		p.logger.ErrorContext(ctx, "error while sending voice server update", slog.Any("err", err))
-	}
 	p.voice.Token = token
 	p.voice.Endpoint = endpoint
+
+	// we should receive a session id from a VOICE_STATE_UPDATE event before the VOICE_SERVER_UPDATE event.
+	if p.voice.SessionID == "" {
+		return
+	}
+
+	if err := p.sendVoiceUpdate(ctx); err != nil {
+		p.logger.ErrorContext(ctx, "error while sending voice server update", slog.Any("err", err))
+	}
 }
 
 func (p *playerImpl) OnVoiceStateUpdate(ctx context.Context, channelID *snowflake.ID, sessionID string) {
 	if channelID == nil {
 		p.channelID = nil
+		p.voice = lavalink.VoiceState{}
 		if err := p.Destroy(ctx); err != nil {
 			p.logger.ErrorContext(ctx, "error while destroying player", slog.Any("err", err))
 		}
@@ -250,5 +252,19 @@ func (p *playerImpl) OnVoiceStateUpdate(ctx context.Context, channelID *snowflak
 		return
 	}
 	p.channelID = channelID
-	p.voice.SessionID = sessionID
+	if sessionID != p.voice.SessionID {
+		p.voice.SessionID = sessionID
+		if err := p.sendVoiceUpdate(ctx); err != nil {
+			p.logger.ErrorContext(ctx, "error while sending voice update", slog.Any("err", err))
+		}
+	}
+}
+
+func (p *playerImpl) sendVoiceUpdate(ctx context.Context) error {
+	if _, err := p.Node().Rest().UpdatePlayer(ctx, p.node.SessionID(), p.guildID, lavalink.PlayerUpdate{
+		Voice: &p.voice,
+	}); err != nil {
+		return fmt.Errorf("error while sending voice update: %w", err)
+	}
+	return nil
 }
